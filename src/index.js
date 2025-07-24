@@ -8,9 +8,12 @@ import HtmlButtonResponsePlugin from '@jspsych/plugin-html-button-response';
 import VideoDescriptionPlugin from './jspsych-video-description-trial.js';
 import "./styles/main.scss";
 const videoContext = require.context('./assets/video', false, /\.(mp4|webm|ogg|mov|MP4)$/);
+const instructContext = require.context('./assets/video/instruct', false, /\.(mp4|webm|ogg|mov|MP4)$/);
 const audioContext = require.context('./assets/video', false, /\.(m4a)$/)
 
 const videoPaths = videoContext.keys();
+const instructPaths = instructContext.keys();
+console.log(instructPaths);
 const audioPaths = audioContext.keys();
 
 // 3. Import each video
@@ -109,33 +112,95 @@ const if_fluent_english = {
 timeline.push(screener, if_fluent_english);
 
 // ## 2. Instructions ##
+
 const instructions = {
     type: InstructionsPlugin,
     pages: [
-        // Page 1 (from #instructions-landing)
-        `<h1>Welcome to the experiment!</h1>
-         <p>Thank you for participating in our experiment!</p>
-         <p>We are researchers interested in in how we understand other people in professional settings.</p>
-         <p>Your job today is simple. <b>There are four parts to our task.</b></p>
-         <ul class="list-group">
-            <li class="list-group-item"><strong>1. View professional video introductions and write down impressions of the speaker.</strong></li>
-            <li class="list-group-item"><strong>2. Form a final impression of the speaker in the video.</strong></li>
-            <li class="list-group-item"><strong>3. Rate the job candidate on several attributes. </strong></li>
-            <li class="list-group-item"><strong>4. Decide whether to offer the job candidate an interview at the company.</strong></li>
-          </ul>
-         <p class="alert alert-dark">Today, you will take on the role of a professional recruiter...</p>`,
-        // Page 2 (from #instructions1)
-        `<h1>Step 1: Watch and describe the job candidate in the video.</h1>
-         <p>Pause the video whenever you want to enter words describing the person in the video. You can pause by clicking anywhere on the video.</p>
-         <p><strong>Enter one word at a time, </strong> but you can enter multiple words each time you pause...</p>`,
-        // ... more instruction pages would go here ...
-        // Page last (from #instructions5)
-        `<h1>Step 4: Make a recruitment decision.</h1>
-         <p>After evaluating the candidate on all attributes, decide whether to invite them for an interview at the company they applied to.</p>
-         <p>Press the button below to get started when you are ready.</p>
-         <div class="alert alert-dark text-center"><h3>Please make sure your sound is on before continuing.</h3></div>`
+        // Page 1: Landing Page
+        `<div class="col-7 justify-content-center mx-auto">
+            <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+                <h1 class="display-4">Instructions</h1>
+                <p class="lead" style="color: red">Please read the following carefully</p>
+            </div>
+            <h1>Welcome to the experiment!</h1>
+            <p>Thank you for participating in our experiment!</p>
+            <p>We are researchers interested in how we understand other people in professional settings.</p>
+            <p>Your job today is simple. <b>There are four parts to our task.</b></p>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>1. View professional video introductions and write down impressions of the speaker.</strong></li>
+                <li class="list-group-item"><strong>2. Form a final impression of the speaker in the video.</strong></li>
+                <li class="list-group-item"><strong>3. Rate the job candidate on several attributes. </strong></li>
+                <li class="list-group-item"><strong>4. Decide whether to offer the job candidate an interview at the company.</strong></li>
+            </ul>
+            <p>You will repeat these steps for each video.</p>
+            <p class="alert alert-dark">Today, you will take on the role of a professional recruiter. A set of companies (i.e., your clients) have tasked you with reviewing professional video introductions by job candidates. While viewing each video, you should form impressions about the person. Once you have watched the video and formed your impressions, you will make a decision about whether or not the candidate should be offered an interview at the company they applied to.</p>
+            <p>In the next few pages, you will learn more about each step of the experiment.</p>
+        </div>`,
+
+        // Page 2: Step 1 Instructions
+        `<div class="col-7 justify-content-center mx-auto">
+            <h1>Step 1: Watch and describe the job candidate in the video.</h1>
+            <video class="w-100" autoplay muted loop src="assets/video/instruct/submitting.mov" type="video/mp4"></video>
+            <p>Pause the video whenever you want to enter words describing the person in the video. You can pause by clicking anywhere on the video.</p>
+            <p><strong>Enter one word at a time, </strong> but you can enter multiple words each time you pause (see video). For example, if at a certain point you feel like the person is being an annoying man, please enter the terms “man” and “annoying” separately when you pause. Order does not matter.</p>
+            <p>Enter whatever comes to mind spontaneously. There are no limits on what you enter!</p>
+            <div class="alert alert-dark text-center">
+                <p>Note there is a minimum amount of time that needs to pass between each time you pause the video (2 seconds).</p>
+            </div>
+        </div>`,
+
+        // Page 3: Step 2 Instructions
+        `<div class="col-7 justify-content-center mx-auto">
+            <h1>Step 2: Form a final impression.</h1>
+            <video class="w-100" autoplay muted loop src="assets/video/instruct/final.mov" type="video/mp4"></video>
+            <p>Form your final impression of the speaker. <strong>Think of this as a list of words you'd use to describe this person to someone else, your summary impression of a person.</strong> Once again, enter one word at a time, for as many words as you'd like.</p>
+        </div>`,
+
+        // Page 4: Step 3 Instructions (Part 1)
+        `<div class="col-7 justify-content-center mx-auto">
+            <h1>Step 3: Rate the speaker on several attributes.</h1>
+            <video class="w-100" autoplay muted loop src="assets/video/instruct/rating.mov" type="video/mp4"></video>
+            <p>Once you finish watching the video, you will rate the candidate in the video on several attributes using a slider. <strong>Please go with your gut feelings, and don't overthink it.</strong> You will be evaluating the candidate on these attributes:</p>
+            <p><b>Please read the category descriptions carefully below:</b></p>
+            <ul class="list-group text-start">
+                <li class="list-group-item"><strong>Openness to new experiences:</strong> willingness to try new things and to explore new ideas</li>
+                <li class="list-group-item"><strong>Conscientiousness:</strong> extent to which the candidate seems organized, hardworking, and goal-oriented</li>
+                <li class="list-group-item"><strong>Extroversion:</strong> extent to which the candidate seems energized by social interaction and enjoys being around other people</li>
+                <li class="list-group-item"><strong>Agreeableness:</strong> extent to which the candidate seems cooperative, kind, and trusting</li>
+                <li class="list-group-item"><strong>Neuroticism:</strong> extent to which the candidate seems prone to negative emotions such as anxiety, anger, and sadness</li>
+            </ul>
+        </div>`,
+
+        // Page 5: Step 3 Instructions (Part 2)
+        `<div class="col-7 justify-content-center mx-auto">
+            <h1>Step 3: Rate the speaker on several attributes (continued).</h1>
+            <p><b>Please read the category descriptions carefully below:</b></p>
+            <ul class="list-group text-start">
+                <li class="list-group-item"><strong>Warmth:</strong> extent to which the candidate seems friendly, approachable, and likeable</li>
+                <li class="list-group-item"><strong>Competence:</strong> extent to which the candidate seems capable, skilled, and knowledgeable</li>
+                <li class="list-group-item"><strong>Confidence:</strong> extent to which the candidate displays self-assurance, decisiveness, and belief in their own abilities</li>
+                <li class="list-group-item"><strong>Leadership capacity:</strong> extent to which the candidate seems like someone who can guide, inspire, and manage others effectively</li>
+                <li class="list-group-item"><strong>Ambitiousness:</strong> extent to which the candidate displays a strong desire for achievement, advancement, and success</li>
+                <li class="list-group-item"><strong>Trustworthiness:</strong> extent to which the candidate is seems reliable, honest, and dependable in their actions and communications</li>
+            </ul>
+        </div>`,
+
+        // Page 6: Step 4 and Final Instructions
+        `<div class="col-7 justify-content-center mx-auto">
+            <h1>Step 4: Make a recruitment decision.</h1>
+            <video class="w-100" autoplay muted loop src="assets/video/instruct/decision.mov" type="video/mp4"></video>
+            <p>After evaluating the candidate on all attributes, decide whether to invite them for an interview at the company they applied to.</p>
+            <p>You will repeat these 4 steps for 10 videos. We encourage you to have fun with this task. Writing more is better than writing less!</p>
+            <p>After completing all videos, there will be a textbox to provide feedback. We welcome any of your thoughts about ways to improve the task and appreciate your time and effort.</p>
+            <p>Press the button below to get started when you are ready.</p>
+            <div class="alert alert-dark text-center">
+                <h3>Please make sure your sound is on before continuing.</h3>
+            </div>
+        </div>`
     ],
-    show_clickable_nav: true
+    show_clickable_nav: true,
+    button_label_next: "Next",
+    button_label_previous: "Previous"
 };
 
 timeline.push(instructions);

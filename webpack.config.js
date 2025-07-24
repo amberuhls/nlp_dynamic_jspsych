@@ -66,6 +66,13 @@ const config = {
                 generator: {
                     filename: 'assets/video/[name][ext][query]', // Or 'videos/', 'audio/' etc.
                 },
+            },
+            {
+                test: /\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a|mov)$/i, // Add audio files if you want too!
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/video/instruct/[name][ext][query]', // Or 'videos/', 'audio/' etc.
+                },
             }
 
             // Add your rules for custom modules here
