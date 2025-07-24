@@ -44,7 +44,7 @@ const config = {
                 use: [stylesHandler, 'css-loader', 'sass-loader'],
             },
             {
-                test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
+                test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif|mp4|mov|m4a|MP4)$/i,
                 type: 'asset',
             },
 
@@ -53,27 +53,6 @@ const config = {
                 use: ['html-loader'],
             },
 
-            {
-                test: /\.(png|jpe?g|gif|svg|webp)$/i, // This regex matches common image file extensions
-                type: 'asset/resource', // This tells Webpack to treat these as asset resources
-                generator: {
-                    filename: 'assets/image/[name][ext][query]', // Optional: customize output path and filename
-                },
-            },
-            {
-                test: /\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a|mov)$/i, // Add audio files if you want too!
-                type: 'asset/resource',
-                generator: {
-                    filename: 'assets/video/[name][ext][query]', // Or 'videos/', 'audio/' etc.
-                },
-            },
-            {
-                test: /\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a|mov)$/i, // Add audio files if you want too!
-                type: 'asset/resource',
-                generator: {
-                    filename: 'assets/video/instruct/[name][ext][query]', // Or 'videos/', 'audio/' etc.
-                },
-            }
 
             // Add your rules for custom modules here
             // Learn more about loaders from https://webpack.js.org/loaders/

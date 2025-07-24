@@ -5,27 +5,28 @@ import InstructionsPlugin from '@jspsych/plugin-instructions';
 import SurveyHtmlFormPlugin from '@jspsych/plugin-survey-html-form';
 import SurveyTextPlugin from '@jspsych/plugin-survey-text';
 import HtmlButtonResponsePlugin from '@jspsych/plugin-html-button-response';
+import PreloadPlugin from '@jspsych/plugin-preload';
 import VideoDescriptionPlugin from './jspsych-video-description-trial.js';
 import "./styles/main.scss";
 const videoContext = require.context('./assets/video', false, /\.(mp4|webm|ogg|mov|MP4)$/);
 const instructContext = require.context('./assets/video/instruct', false, /\.(mp4|webm|ogg|mov|MP4)$/);
 const audioContext = require.context('./assets/video', false, /\.(m4a)$/)
 
-const videoPaths = videoContext.keys();
-const instructPaths = instructContext.keys();
-console.log(instructPaths);
-const audioPaths = audioContext.keys();
+function importAll(r) {
+    let images = {};
+    r.keys().map((item) => {
+        images[item.replace('./', '')] = r(item);
+    });
+    return images;
+}
 
-// 3. Import each video
-const videos_all = videoPaths.map(videoPath => {
-    // Use the 'split' method to break the path by the '/' character,
-    // then 'pop()' to get the last element (which should be the filename).
-    return videoPath.split('/').pop();
-});
-const audio = audioPaths.map(audioContext)
+const videos_all = Object.values(importAll(videoContext));
+const instruct = importAll(instructContext)
+const audio = importAll(audioContext);
 
-// Now 'videos' is an array where each element is the URL of a video asset
-console.log(videos_all, audio); // e.g., ['/media/video1.abcdef123.mp4', '/media/video2.ghijkl456.webm']
+let test_mode = false;
+
+console.log(videos_all, instruct, audio)
 
 
 const STUDY_ID = "study_3";
@@ -42,7 +43,7 @@ const jsPsych = initJsPsych({
 
 
 // Create a randomized list of 10 videos for the experiment
-const video_list = jsPsych.randomization.sampleWithReplacement(videos_all, 10);
+const video_list = jsPsych.randomization.sampleWithReplacement(videos_all, 1);
 
 // Create timeline variables for the loop
 const video_timeline_variables = video_list.map(video_name => ({ video: video_name }));
@@ -52,24 +53,30 @@ const video_timeline_variables = video_list.map(video_name => ({ video: video_na
 // Main timeline
 const timeline = [];
 
+timeline.push({
+    type: PreloadPlugin,
+    video: [...videos_all, ...Object.values(instruct)],
+    audio: Object.values(audio),
+});
+
 // ## 1. Screener ##
 const screener = {
     type: SurveyHtmlFormPlugin,
     html: `
-        <div class="container-fluid">
-            <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center row">
-                <h1 class="display-4">Welcome to the experiment</h1>
-                <p class="lead">Please answer the following questions to determine your eligility.</p>
+        <div>
+            <div>
+                <h1>Welcome to the experiment</h1>
+                <p>Please answer the following questions to determine your eligility.</p>
             </div>
-            <div class="col d-flex justify-content-center mx-auto">
+            <div>
                 <div>
-                    <div class="form-group">
-                        <label class="control-label" for="prolific-id">Please enter your Prolific ID correctly.</label>
-                        <input id="prolific-id" name="prolific_id" type="text" class="form-control" autocomplete="off" required />
+                    <div>
+                        <label for="prolific-id">Please enter your Prolific ID correctly.</label>
+                        <input id="prolific-id" name="prolific_id" type="text" autocomplete="off" required />
                     </div>
-                    <div class="form-group">
+                    <div>
                         <label for="english-check-input">Are you fluent in English?</label>
-                        <select class="form-control" name="fluent_english" id="english-check-input" required>
+                        <select name="fluent_english" id="english-check-input" required>
                             <option>No</option>
                             <option>Yes</option>
                         </select>
@@ -81,6 +88,7 @@ const screener = {
     on_finish: function (data) {
         // This logic remains the same
         const subj_id = data.response.prolific_id;
+        if (subj_id == "test") { test_mode = true };
         jsPsych.data.addProperties({ subject_id: subj_id });
     }
 };
@@ -88,8 +96,8 @@ const screener = {
 const rejection_screen = {
     type: HtmlKeyboardResponsePlugin,
     stimulus: `
-        <div class="row">
-            <div class="col d-flex justify-content-center mx-auto">
+        <div>
+            <div>
                 <h1>Thank you for your interest. Unfortunately, you are not eligible for this task. We appreciate it if you do not complete this experiment.</h1>
             </div>
         </div>`, // The HTML content remains the same
@@ -117,83 +125,83 @@ const instructions = {
     type: InstructionsPlugin,
     pages: [
         // Page 1: Landing Page
-        `<div class="col-7 justify-content-center mx-auto">
-            <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-                <h1 class="display-4">Instructions</h1>
-                <p class="lead" style="color: red">Please read the following carefully</p>
+        `<div>
+            <div>
+                <h1>Instructions</h1>
+                <p style="color: red">Please read the following carefully</p>
             </div>
             <h1>Welcome to the experiment!</h1>
             <p>Thank you for participating in our experiment!</p>
             <p>We are researchers interested in how we understand other people in professional settings.</p>
             <p>Your job today is simple. <b>There are four parts to our task.</b></p>
-            <ul class="list-group">
-                <li class="list-group-item"><strong>1. View professional video introductions and write down impressions of the speaker.</strong></li>
-                <li class="list-group-item"><strong>2. Form a final impression of the speaker in the video.</strong></li>
-                <li class="list-group-item"><strong>3. Rate the job candidate on several attributes. </strong></li>
-                <li class="list-group-item"><strong>4. Decide whether to offer the job candidate an interview at the company.</strong></li>
+            <ul>
+                <li><strong>1. View professional video introductions and write down impressions of the speaker.</strong></li>
+                <li><strong>2. Form a final impression of the speaker in the video.</strong></li>
+                <li><strong>3. Rate the job candidate on several attributes. </strong></li>
+                <li><strong>4. Decide whether to offer the job candidate an interview at the company.</strong></li>
             </ul>
             <p>You will repeat these steps for each video.</p>
-            <p class="alert alert-dark">Today, you will take on the role of a professional recruiter. A set of companies (i.e., your clients) have tasked you with reviewing professional video introductions by job candidates. While viewing each video, you should form impressions about the person. Once you have watched the video and formed your impressions, you will make a decision about whether or not the candidate should be offered an interview at the company they applied to.</p>
+            <p>Today, you will take on the role of a professional recruiter. A set of companies (i.e., your clients) have tasked you with reviewing professional video introductions by job candidates. While viewing each video, you should form impressions about the person. Once you have watched the video and formed your impressions, you will make a decision about whether or not the candidate should be offered an interview at the company they applied to.</p>
             <p>In the next few pages, you will learn more about each step of the experiment.</p>
         </div>`,
 
         // Page 2: Step 1 Instructions
-        `<div class="col-7 justify-content-center mx-auto">
+        `<div>
             <h1>Step 1: Watch and describe the job candidate in the video.</h1>
-            <video class="w-100" autoplay muted loop src="assets/video/instruct/submitting.mov" type="video/mp4"></video>
+            <video autoplay muted loop src="${instruct["submitting.mov"]}" type="video/mp4"></video>
             <p>Pause the video whenever you want to enter words describing the person in the video. You can pause by clicking anywhere on the video.</p>
             <p><strong>Enter one word at a time, </strong> but you can enter multiple words each time you pause (see video). For example, if at a certain point you feel like the person is being an annoying man, please enter the terms “man” and “annoying” separately when you pause. Order does not matter.</p>
             <p>Enter whatever comes to mind spontaneously. There are no limits on what you enter!</p>
-            <div class="alert alert-dark text-center">
+            <div>
                 <p>Note there is a minimum amount of time that needs to pass between each time you pause the video (2 seconds).</p>
             </div>
         </div>`,
 
         // Page 3: Step 2 Instructions
-        `<div class="col-7 justify-content-center mx-auto">
+        `<div>
             <h1>Step 2: Form a final impression.</h1>
-            <video class="w-100" autoplay muted loop src="assets/video/instruct/final.mov" type="video/mp4"></video>
+            <video autoplay muted loop src="${instruct["final.mov"]}" type="video/mp4"></video>
             <p>Form your final impression of the speaker. <strong>Think of this as a list of words you'd use to describe this person to someone else, your summary impression of a person.</strong> Once again, enter one word at a time, for as many words as you'd like.</p>
         </div>`,
 
         // Page 4: Step 3 Instructions (Part 1)
-        `<div class="col-7 justify-content-center mx-auto">
+        `<div>
             <h1>Step 3: Rate the speaker on several attributes.</h1>
-            <video class="w-100" autoplay muted loop src="assets/video/instruct/rating.mov" type="video/mp4"></video>
+            <video autoplay muted loop  src="${instruct["rating.mov"]}" type="video/mp4"></video>
             <p>Once you finish watching the video, you will rate the candidate in the video on several attributes using a slider. <strong>Please go with your gut feelings, and don't overthink it.</strong> You will be evaluating the candidate on these attributes:</p>
             <p><b>Please read the category descriptions carefully below:</b></p>
-            <ul class="list-group text-start">
-                <li class="list-group-item"><strong>Openness to new experiences:</strong> willingness to try new things and to explore new ideas</li>
-                <li class="list-group-item"><strong>Conscientiousness:</strong> extent to which the candidate seems organized, hardworking, and goal-oriented</li>
-                <li class="list-group-item"><strong>Extroversion:</strong> extent to which the candidate seems energized by social interaction and enjoys being around other people</li>
-                <li class="list-group-item"><strong>Agreeableness:</strong> extent to which the candidate seems cooperative, kind, and trusting</li>
-                <li class="list-group-item"><strong>Neuroticism:</strong> extent to which the candidate seems prone to negative emotions such as anxiety, anger, and sadness</li>
+            <ul>
+                <li><strong>Openness to new experiences:</strong> willingness to try new things and to explore new ideas</li>
+                <li><strong>Conscientiousness:</strong> extent to which the candidate seems organized, hardworking, and goal-oriented</li>
+                <li><strong>Extroversion:</strong> extent to which the candidate seems energized by social interaction and enjoys being around other people</li>
+                <li><strong>Agreeableness:</strong> extent to which the candidate seems cooperative, kind, and trusting</li>
+                <li><strong>Neuroticism:</strong> extent to which the candidate seems prone to negative emotions such as anxiety, anger, and sadness</li>
             </ul>
         </div>`,
 
         // Page 5: Step 3 Instructions (Part 2)
-        `<div class="col-7 justify-content-center mx-auto">
+        `<div>
             <h1>Step 3: Rate the speaker on several attributes (continued).</h1>
             <p><b>Please read the category descriptions carefully below:</b></p>
-            <ul class="list-group text-start">
-                <li class="list-group-item"><strong>Warmth:</strong> extent to which the candidate seems friendly, approachable, and likeable</li>
-                <li class="list-group-item"><strong>Competence:</strong> extent to which the candidate seems capable, skilled, and knowledgeable</li>
-                <li class="list-group-item"><strong>Confidence:</strong> extent to which the candidate displays self-assurance, decisiveness, and belief in their own abilities</li>
-                <li class="list-group-item"><strong>Leadership capacity:</strong> extent to which the candidate seems like someone who can guide, inspire, and manage others effectively</li>
-                <li class="list-group-item"><strong>Ambitiousness:</strong> extent to which the candidate displays a strong desire for achievement, advancement, and success</li>
-                <li class="list-group-item"><strong>Trustworthiness:</strong> extent to which the candidate is seems reliable, honest, and dependable in their actions and communications</li>
+            <ul>
+                <li><strong>Warmth:</strong> extent to which the candidate seems friendly, approachable, and likeable</li>
+                <li><strong>Competence:</strong> extent to which the candidate seems capable, skilled, and knowledgeable</li>
+                <li><strong>Confidence:</strong> extent to which the candidate displays self-assurance, decisiveness, and belief in their own abilities</li>
+                <li><strong>Leadership capacity:</strong> extent to which the candidate seems like someone who can guide, inspire, and manage others effectively</li>
+                <li><strong>Ambitiousness:</strong> extent to which the candidate displays a strong desire for achievement, advancement, and success</li>
+                <li><strong>Trustworthiness:</strong> extent to which the candidate is seems reliable, honest, and dependable in their actions and communications</li>
             </ul>
         </div>`,
 
         // Page 6: Step 4 and Final Instructions
-        `<div class="col-7 justify-content-center mx-auto">
+        `<div>
             <h1>Step 4: Make a recruitment decision.</h1>
-            <video class="w-100" autoplay muted loop src="assets/video/instruct/decision.mov" type="video/mp4"></video>
+            <video autoplay muted loop src="${instruct["decision.mov"]}" type="video/mp4"></video>
             <p>After evaluating the candidate on all attributes, decide whether to invite them for an interview at the company they applied to.</p>
             <p>You will repeat these 4 steps for 10 videos. We encourage you to have fun with this task. Writing more is better than writing less!</p>
             <p>After completing all videos, there will be a textbox to provide feedback. We welcome any of your thoughts about ways to improve the task and appreciate your time and effort.</p>
             <p>Press the button below to get started when you are ready.</p>
-            <div class="alert alert-dark text-center">
+            <div>
                 <h3>Please make sure your sound is on before continuing.</h3>
             </div>
         </div>`
@@ -212,17 +220,17 @@ timeline.push(instructions);
 const audio_check_trial = {
     type: SurveyHtmlFormPlugin,
     html: `
-        <div class="col-6 justify-content-center mx-auto text-center">
-            <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-                <h1 class="display-4">Audio Check</h1>
-                <p class="lead" style="color: red">Please make sure your sound is on.</p>
+        <div>
+            <div>
+                <h1>Audio Check</h1>
+                <p style="color: red">Please make sure your sound is on.</p>
             </div>
             <p>In the audio clip below, you will hear a sequence of five numbers.</p>
             <p>Please type those numbers in the box to continue.</p>
-            <audio controls autoplay src="assets/video/audiocheck.m4a"></audio>
-            <div class="mt-4">
+            <audio controls autoplay src="${audio["audiocheck.m4a"]}"></audio>
+            <div>
                 <label for="audio-response">Enter the numbers you heard (e.g., "54392"):</label>
-                <input type="text" id="audio-response" name="audio_response" class="form-control text-center" required />
+                <input type="text" id="audio-response" name="audio_response" required />
             </div>
         </div>
     `,
@@ -235,7 +243,7 @@ const audio_check_trial = {
 
 const audio_check_feedback = {
     type: HtmlKeyboardResponsePlugin,
-    stimulus: `<p class="text-danger">Incorrect. Please listen carefully and try again.</p>`,
+    stimulus: `<p>Incorrect. Please listen carefully and try again.</p>`,
     choices: "NO_KEYS",
     trial_duration: 2000,
 };
@@ -278,7 +286,8 @@ timeline.push(audio_check_procedure);
 // ## 4. Main Video Loop  ##
 const video_trial = {
     type: VideoDescriptionPlugin,
-    video: jsPsych.timelineVariable('video')
+    video: jsPsych.timelineVariable('video'),
+    show_video_controls: true,
 };
 
 
@@ -288,28 +297,28 @@ const final_impression_trial = {
     type: HtmlKeyboardResponsePlugin,
     stimulus: `
         <div id="final-impression-body">
-            <div class="header px-3 pt-md-1 mx-auto text-center">
-                <h1 class="display-4">Final Impressions</h1>
-                <p class="lead" style="color: red">Please read the following carefully</p>
+            <div>
+                <h1>Final Impressions</h1>
+                <p style="color: red">Please read the following carefully</p>
             </div>
-            <div class="row">
-                <div class="col-6 justify-content-center mx-auto text-center">
-                    <p class="display-8">
+            <div>
+                <div>
+                    <p>
                         <b>Please add or remove any final words that you feel describe this candidate. <br><i>You must include at least two.</i></b>
                     </p>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-6 mx-auto">
-                    <div id="final-sorter" class="list-group"></div>
-                    <p id="final-cannot-add-notice" class="text-danger text-center" style="display: none;">You cannot add an item already in the list.</p>
-                    <form id="final-descript-form" class="form-inline justify-content-center mt-2">
-                        <div class="input-group">
-                            <input id="final-descript-input" type="text" class="form-control" placeholder="e.g. 'thoughtful'" autocomplete="off">
-                            <button id="final-descript-add" type="submit" class="btn btn-primary">+</button>
+            <div>
+                <div>
+                    <div id="final-sorter"></div>
+                    <p id="final-cannot-add-notice" style="display: none;">You cannot add an item already in the list.</p>
+                    <form id="final-descript-form">
+                        <div>
+                            <input id="final-descript-input" type="text" placeholder="e.g. 'thoughtful'" autocomplete="off">
+                            <button id="final-descript-add" type="submit">+</button>
                         </div>
                     </form>
-                    <button id="final-submit" class="btn btn-primary my-2 w-100" disabled>Submit Final Impression</button>
+                    <button id="final-submit" disabled>Submit Final Impression</button>
                 </div>
             </div>
         </div>
@@ -382,22 +391,22 @@ const rating_trial = {
     // ... html property remains the same ...
     html: `
         <div id="rating-body">
-            <div class="header px-3 pt-md-1 mx-auto text-center">
-                <h1 class="display-4">Rating Impressions</h1>
-                <p class="display-8"><b>Rate the candidate in the video on the following parameters.</b></p>
+            <div>
+                <h1>Rating Impressions</h1>
+                <p><b>Rate the candidate in the video on the following parameters.</b></p>
             </div>
-            <div class="col-6 justify-content-center mx-auto">
-                <div class="mb-3">
-                    <label for="openness" class="form-label">Open to new experiences</label>
-                    <input type="range" class="form-range" name="openness" min="0" max="10" step="1" value="5">
+            <div>
+                <div>
+                    <label for="openness">Open to new experiences</label>
+                    <input type="range" name="openness" min="0" max="10" step="1" value="5">
                 </div>
-                <div class="mb-3">
-                    <label for="conscientiousness" class="form-label">Conscientious</label>
-                    <input type="range" class="form-range" name="conscientiousness" min="0" max="10" step="1" value="5">
+                <div>
+                    <label for="conscientiousness">Conscientious</label>
+                    <input type="range" name="conscientiousness" min="0" max="10" step="1" value="5">
                 </div>
-                <div class="mb-3">
-                    <label for="trustworthiness" class="form-label">Trustworthy</label>
-                    <input type="range" class="form-range" name="trustworthiness" min="0" max="10" step="1" value="5">
+                <div>
+                    <label for="trustworthiness">Trustworthy</label>
+                    <input type="range" name="trustworthiness" min="0" max="10" step="1" value="5">
                 </div>
             </div>
         </div>
@@ -416,9 +425,9 @@ const decision_trial = {
     // ... stimulus and choices properties remain the same ...
     stimulus: `
         <div id="recruitment-decision-body">
-            <div class="header px-3 pt-md-1 mx-auto text-center">
-                <h1 class="display-4">Recruitment Decision</h1>
-                <p class="display-8"><b>Please decide whether to invite this candidate for an interview.</b></p>
+            <div>
+                <h1>Recruitment Decision</h1>
+                <p><b>Please decide whether to invite this candidate for an interview.</b></p>
             </div>
         </div>
     `,
@@ -456,8 +465,8 @@ const feedback_trial = {
     type: SurveyTextPlugin,
     questions: [
         {
-            prompt: `<div class="col d-flex justify-content-center mx-auto text-center px-3 pt-md-1">
-                        <label for="feedback-textarea" class="mb-3">Please let us know if any part of the study was confusing, unclear, or in need of improvement. We appreciate your feedback greatly!</label>
+            prompt: `<div>
+                        <label for="feedback-textarea">Please let us know if any part of the study was confusing, unclear, or in need of improvement. We appreciate your feedback greatly!</label>
                      </div>`,
             name: 'feedback',
             rows: 5,
@@ -476,43 +485,43 @@ const feedback_trial = {
 const demographics_trial = {
     type: SurveyHtmlFormPlugin,
     html: `
-        <div class="col-8 mx-auto">
+        <div>
             <div>
-                <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-                    <h1 class="display-4">Demographics Section</h1>
+                <div>
+                    <h1>Demographics Section</h1>
                 </div>
-                <div class="survey mx-auto col-6 text-left">
-                    <div class="form-group mb-4">
+                <div>
+                    <div>
                         <label for="age-input">What is your age?</label>
-                        <input type="number" name="age" class="form-control" id="age-input" required />
+                        <input type="number" name="age" id="age-input" required />
                     </div>
-                    <fieldset class="form-group mb-4">
+                    <fieldset>
                         <label>What gender do you identify with? (Select all that apply)</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="gender" id="gender-male" value="male" />
-                            <label class="form-check-label" for="gender-male">Male</label>
+                        <div>
+                            <input type="checkbox" name="gender" id="gender-male" value="male" />
+                            <label for="gender-male">Male</label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="gender" id="gender-female" value="female" />
-                            <label class="form-check-label" for="gender-female">Female</label>
+                        <div>
+                            <input type="checkbox" name="gender" id="gender-female" value="female" />
+                            <label for="gender-female">Female</label>
                         </div>
                         </fieldset>
-                    <fieldset class="form-group mb-4">
+                    <fieldset>
                         <label>What race/ethnicity do you identify with? (Select all that apply)</label>
-                        <div class="form-check">
-                             <input class="form-check-input" type="checkbox" name="race" value="AmericanIndian" id="race-AmericanIndian" />
-                             <label class="form-check-label" for="race-AmericanIndian">American Indian or Alaska Native</label>
+                        <div>
+                             <input type="checkbox" name="race" value="AmericanIndian" id="race-AmericanIndian" />
+                             <label for="race-AmericanIndian">American Indian or Alaska Native</label>
                         </div>
                         </fieldset>
-                    <fieldset class="form-group mb-4">
+                    <fieldset>
                         <label>What is the highest level of education you have received?</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="education" value="LessThanHighSchool" id="education-LessThanHighSchool" required />
-                            <label class="form-check-label" for="education-LessThanHighSchool">Less than High School</label>
+                        <div>
+                            <input type="radio" name="education" value="LessThanHighSchool" id="education-LessThanHighSchool" required />
+                            <label for="education-LessThanHighSchool">Less than High School</label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="education" value="doctoral" id="education-doctoral" />
-                            <label class="form-check-label" for="education-doctoral">Doctoral Degree</label>
+                        <div>
+                            <input type="radio" name="education" value="doctoral" id="education-doctoral" />
+                            <label for="education-doctoral">Doctoral Degree</label>
                         </div>
                     </fieldset>
                 </div>
@@ -522,6 +531,10 @@ const demographics_trial = {
     button_label: 'Submit',
     on_finish: function (data) {
         const subj_id = jsPsych.data.get().values()[0].subject_id;
+        if (test_mode) {
+            jsPsych.pauseExperiment()
+            jsPsych.data.displayData('csv');
+        }
     }
 };
 // Add this trial definition to your main.js file
@@ -529,11 +542,11 @@ const demographics_trial = {
 const finished_trial = {
     type: HtmlButtonResponsePlugin,
     stimulus: `
-        <div class="col-8 justify-content-center mx-auto">
-            <div class="header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-                <h1 class="display-4">Study Completed</h1>
+        <div>
+            <div>
+                <h1>Study Completed</h1>
             </div>
-            <div class="alert alert-dark text-center">
+            <div>
                 <h1>Thank you for participating in the study!</h1>
             </div>
         </div>

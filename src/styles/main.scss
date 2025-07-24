@@ -1,6 +1,18 @@
 @use "jspsych/css/jspsych.css";
-@use "bootstrap/scss/bootstrap";
 
 .jspsych-display-element {
   background-color: #ffffff;
+}
+
+.jspsych-content {
+  max-width: 60%; 
+}
+
+ul {
+  list-style-type: none;
+}
+
+video {
+  max-height: 40%;
+  max-width: 50%;
 }
