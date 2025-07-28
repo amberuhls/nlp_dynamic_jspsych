@@ -7,6 +7,7 @@ import SurveyTextPlugin from '@jspsych/plugin-survey-text';
 import HtmlButtonResponsePlugin from '@jspsych/plugin-html-button-response';
 import PreloadPlugin from '@jspsych/plugin-preload';
 import VideoDescriptionPlugin from './jspsych-video-description-trial.js';
+import SurveyPlugin from '@jspsych/plugin-survey';
 import "./styles/main.scss";
 const videoContext = require.context('./assets/video', false, /\.(mp4|webm|ogg|mov|MP4)$/);
 const instructContext = require.context('./assets/video/instruct', false, /\.(mp4|webm|ogg|mov|MP4)$/);
@@ -387,36 +388,105 @@ const final_impression_trial = {
 
 // --- Replace the existing rating_trial ---
 const rating_trial = {
-    type: SurveyHtmlFormPlugin,
-    // ... html property remains the same ...
-    html: `
-        <div id="rating-body">
-            <div>
-                <h1>Rating Impressions</h1>
-                <p><b>Rate the candidate in the video on the following parameters.</b></p>
-            </div>
-            <div>
-                <div>
-                    <label for="openness">Open to new experiences</label>
-                    <input type="range" name="openness" min="0" max="10" step="1" value="5">
-                </div>
-                <div>
-                    <label for="conscientiousness">Conscientious</label>
-                    <input type="range" name="conscientiousness" min="0" max="10" step="1" value="5">
-                </div>
-                <div>
-                    <label for="trustworthiness">Trustworthy</label>
-                    <input type="range" name="trustworthiness" min="0" max="10" step="1" value="5">
-                </div>
-            </div>
-        </div>
-    `,
-    button_label: 'Submit Ratings',
-    on_finish: function (data) {
-        // CORRECTED API CALLS
-        const subj_id = jsPsych.data.get().filter({ trial_type: 'survey-html-form' }).values()[0].response.prolific_id;
-        const video_name = jsPsych.evaluateTimelineVariable('video');
-    }
+    type: SurveyPlugin,
+    survey_json: {
+        showQuestionNumbers: false,
+        title: 'My questionnaire',
+        elements: [
+
+            {
+                "type": "slider",
+                "name": "openness",
+                "title": "Open to new experiences",
+                "min": 1,
+                "max": 10,
+                "step": 1,
+            },
+            {
+                "type": "slider",
+                "name": "conscientiousness",
+                "title": "Conscientious",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "extroversion",
+                "title": "Extroverted",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "agreeableness",
+                "title": "Agreeable",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "neuroticism",
+                "title": "Neurotic",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "warmth",
+                "title": "Warm",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "competence",
+                "title": "Competent",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "confidence",
+                "title": "Confident",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "leadership",
+                "title": "Capable of leadership",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "ambitiousness",
+                "title": "Ambitious",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+            {
+                "type": "slider",
+                "name": "trustworthiness",
+                "title": "Trustworthy",
+                "min": 1,
+                "max": 10,
+                "step": 1
+            },
+
+
+        ],
+    },
+    button_label_finish: 'Continue',
 };
 
 // --- Replace the existing decision_trial ---
@@ -561,6 +631,8 @@ const finished_trial = {
 
 // Push the final sections
 timeline.push(demographics_trial, feedback_trial, finished_trial);
+
+timeline.unshift(rating_trial)
 
 // ## Run Experiment ##
 jsPsych.run(timeline);

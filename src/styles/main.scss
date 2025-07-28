@@ -5,7 +5,7 @@
 }
 
 .jspsych-content {
-  max-width: 60%; 
+  max-width: 80%;
 }
 
 ul {
@@ -15,4 +15,59 @@ ul {
 video {
   max-height: 40%;
   max-width: 50%;
+}
+
+/* First, ensure the slider track itself is wide and has space */
+.sd-slider__track,
+.sd-slider__track-wrapper {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Make sure the main slider input also takes full width */
+.sd-slider__input {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+
+/* --- Crucial part for the labels --- */
+
+/* Target the container for labels and force it to be a flex container */
+.sd-slider__labels-container,
+.sd-slider__labels {
+    display: flex !important; /* Force flexbox layout */
+    justify-content: space-between !important; /* Distribute items evenly */
+    width: 100% !important; /* Make sure the container itself is wide */
+    flex-wrap: nowrap !important; /* Prevent labels from wrapping */
+    margin: 0 !important; /* Remove any container margins */
+    padding: 0 !important; /* Remove any container padding */
+}
+
+/* Target the individual labels directly */
+.sd-slider__label {
+    /* These are the absolute crucial overrides */
+    position: static !important; /* This takes them out of absolute positioning */
+    left: auto !important; /* This overrides the inline left:XX% */
+    transform: none !important; /* If any transform is moving them, undo it */
+
+    /* Flexbox specific properties for the labels themselves */
+    flex-grow: 1 !important; /* Let them grow to fill space */
+    flex-shrink: 0 !important; /* Prevent them from shrinking too much */
+    flex-basis: 0 !important; /* Allow flex-grow to do its job */
+
+    text-align: center !important; /* Center the text */
+    white-space: nowrap !important; /* Keep text on one line */
+    overflow: visible !important; /* Ensure content isn't hidden if it overflows slightly */
+    padding: 0 2px !important; /* Small padding to prevent text collision */
+    box-sizing: border-box !important;
+}
+
+/* Make the actual text within the labels smaller if needed for fit */
+.sd-slider__label .sv-string-viewer {
+    font-size: 0.85em !important; /* Adjust as needed */
 }
