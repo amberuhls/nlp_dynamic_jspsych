@@ -1,73 +1,204 @@
 @use "jspsych/css/jspsych.css";
+@use "rating.scss";
+@use "screener.scss";
+@use "instructions.scss";
 
 .jspsych-display-element {
   background-color: #ffffff;
 }
 
-.jspsych-content {
-  max-width: 80%;
-}
+
 
 ul {
   list-style-type: none;
 }
 
-video {
-  max-height: 40%;
-  max-width: 50%;
+/* src/css/main_styles.scss */
+
+// --- Global & Page Layout --- //
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
 }
 
-/* First, ensure the slider track itself is wide and has space */
-.sd-slider__track,
-.sd-slider__track-wrapper {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box;
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+  }
+
+  &__sub-title {
+    color: red;
+    font-size: 1.25rem;
+  }
 }
 
-/* Make sure the main slider input also takes full width */
-.sd-slider__input {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box;
+.page-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.notice-text--error {
+  color: red;
+  margin-top: 0.5rem;
 }
 
 
-/* --- Crucial part for the labels --- */
+// --- Form & Input Elements --- //
+.form-item {
+  margin-top: 1.5rem;
 
-/* Target the container for labels and force it to be a flex container */
-.sd-slider__labels-container,
-.sd-slider__labels {
-    display: flex !important; /* Force flexbox layout */
-    justify-content: space-between !important; /* Distribute items evenly */
-    width: 100% !important; /* Make sure the container itself is wide */
-    flex-wrap: nowrap !important; /* Prevent labels from wrapping */
-    margin: 0 !important; /* Remove any container margins */
-    padding: 0 !important; /* Remove any container padding */
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
 }
 
-/* Target the individual labels directly */
-.sd-slider__label {
-    /* These are the absolute crucial overrides */
-    position: static !important; /* This takes them out of absolute positioning */
-    left: auto !important; /* This overrides the inline left:XX% */
-    transform: none !important; /* If any transform is moving them, undo it */
-
-    /* Flexbox specific properties for the labels themselves */
-    flex-grow: 1 !important; /* Let them grow to fill space */
-    flex-shrink: 0 !important; /* Prevent them from shrinking too much */
-    flex-basis: 0 !important; /* Allow flex-grow to do its job */
-
-    text-align: center !important; /* Center the text */
-    white-space: nowrap !important; /* Keep text on one line */
-    overflow: visible !important; /* Ensure content isn't hidden if it overflows slightly */
-    padding: 0 2px !important; /* Small padding to prevent text collision */
-    box-sizing: border-box !important;
+.text-input {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0.5rem auto;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-/* Make the actual text within the labels smaller if needed for fit */
-.sd-slider__label .sv-string-viewer {
-    font-size: 0.85em !important; /* Adjust as needed */
+.form-fieldset {
+  margin-top: 2rem;
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  border-radius: 8px;
+
+  legend {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+}
+
+.form-option-group {
+  display: inline-block;
+  text-align: left;
+}
+
+.form-option {
+  margin-bottom: 0.5rem;
+
+  label {
+    margin-left: 0.5rem;
+  }
+}
+
+
+// --- Word Entry & Lists (Video & Final Impression) --- //
+.word-list {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 100px;
+  margin-bottom: 1rem;
+
+  // Individual word item
+  .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    background-color: #f8f9fa;
+  }
+
+  .btn-close {
+    // The 'x' button
+    border: none;
+    background: transparent;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+}
+
+.word-entry-form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  .text-input {
+    margin: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &__add-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+// --- Final Impression Specific --- //
+.final-impression-wrapper {
+  max-width: 500px;
+  margin: auto;
+}
+
+// --- jsPsych Button Overrides --- //
+.jspsych-btn {
+  margin-top: 1rem;
+}
+
+// --- Video Description Trial --- //
+.video-trial-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.video-trial-header {
+  text-align: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.video-wrapper {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 1.5rem auto;
+
+  video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+}
+
+.video-trial-response-area {
+  max-width: 500px;
+  margin: auto;
+}
+
+.video-trial-notices {
+  min-height: 2rem; // Prevents layout jump when notices appear/disappear
+  margin-bottom: 1rem;
+  text-align: center;
+
+  .notice-text--info {
+    color: #555;
+    font-style: italic;
+  }
 }

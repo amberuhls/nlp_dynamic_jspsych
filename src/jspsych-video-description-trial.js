@@ -61,35 +61,26 @@ class VideoDescriptionPlugin {
 
             // --- 1. RENDER THE HTML (Modified for conditional attributes) ---
             display_element.innerHTML = `
-                <div>
-                    <div>
-                        <p>
-                            ${trial.instruction_text}
-                        </p>
+                <div class="video-trial-container">
+                    <div class="video-trial-header">
+                        <p><b>${trial.instruction_text}</b></p>
                     </div>
-                    <div>
-                        <div>
-                            <video id="main-video" ${controls_attr} ${contextmenu_attr}></video>
+                    <div class="video-wrapper">
+                        <video id="main-video" ${controls_attr} ${contextmenu_attr}></video>
+                    </div>
+                    <div class="video-trial-response-area">
+                        <div id="desc-sorter" class="word-list"></div>
+                        <div class="video-trial-notices">
+                            <h5 id="pause-notice" class="notice-text--info">${trial.pause_notice_text}</h5>
+                            <h5 id="too-early-notice" class="notice-text--error" style="display: none;">${trial.too_early_notice_text}</h5>
+                            <h5 id="cannot-unpause-notice" class="notice-text--error" style="display: none;">${trial.cannot_unpause_notice_text}</h5>
+                            <h5 id="cannot-add-notice" class="notice-text--error" style="display: none;">${trial.cannot_add_notice_text}</h5>
                         </div>
-                        <div>
-                            <div id="desc-sorter"></div>
-                        </div>
-                        <div>
-                            <h5 id="pause-notice" style="display: block;">${trial.pause_notice_text}</h5>
-                            <h5 id="too-early-notice" style="display: none;">${trial.too_early_notice_text}</h5>
-                            <h5 id="cannot-unpause-notice" style="display: none;">${trial.cannot_unpause_notice_text}</h5>
-                            <h5 id="cannot-add-notice" style="display: none;">${trial.cannot_add_notice_text}</h5>
-                            <h5 id="video-error-notice" style="display: none;">${trial.video_error_text}</h5>
-                        </div>
-                        <div>
-                            <form id="add-descript-form">
-                                <div>
-                                    <input id="descript-input" type="text" placeholder="e.g. 'happy', 'trustworthy'" autocomplete="off" disabled>
-                                    <button id="descript-add" type="submit" disabled>+</button>
-                                </div>
-                            </form>
-                            <button id="descript-submit" disabled>Submit Word List</button>
-                        </div>
+                        <form id="add-descript-form" class="word-entry-form">
+                            <input id="descript-input" type="text" class="text-input" placeholder="e.g. 'happy', 'trustworthy'" autocomplete="off" disabled>
+                            <button id="descript-add" type="submit" class="jspsych-btn word-entry-form__add-btn" disabled>+</button>
+                        </form>
+                        <button id="descript-submit" class="jspsych-btn" disabled>Submit Word List</button>
                     </div>
                 </div>`;
 

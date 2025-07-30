@@ -16,6 +16,9 @@ const config = {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
+        filename: 'js/[name].[contenthash].js', // JavaScript files go into 'js' folder
+        assetModuleFilename: 'assets/[name].[hash][ext]', // Videos and audio go in "assets" folder
+        clean: true, // Cleans the 'dist' folder before each build (good practice)
     },
     devServer: {
         open: true,
@@ -64,7 +67,9 @@ module.exports = () => {
     if (isProduction) {
         config.mode = 'production';
 
-        config.plugins.push(new MiniCssExtractPlugin());
+        config.plugins.push(new MiniCssExtractPlugin({
+            filename: 'css/[name].[contenthash].css', // CSS files go into 'css' folder
+        }));
 
 
         config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());

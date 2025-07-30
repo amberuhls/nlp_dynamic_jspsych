@@ -1,0 +1,82 @@
+// A container for the entire rating section
+.rating-section-container {
+    max-width: 600px;
+    margin: auto;
+    text-align: center;
+
+    // Header styles within the rating section
+    .rating-header {
+        h1 {
+            font-size: 2.5rem; // Equivalent to display-4
+        }
+
+        p.lead {
+            color: red;
+            font-size: 1.25rem;
+        }
+
+        p.prompt {
+            font-weight: bold;
+        }
+    }
+
+    // Wrapper for the list of all rating sliders
+    .rating-form-wrapper {
+        max-width: 80%;
+        margin: auto;
+        text-align: center;
+    }
+
+    // Styles for each individual rating item (label + slider)
+    .rating-item {
+        margin-top: 1.25rem;
+
+        .rating-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .rating-slider-wrapper {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #383b3e; // A neutral grey color
+        }
+
+        // Styling the range input itself
+        .rating-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+
+            &:hover {
+                opacity: 1;
+            }
+
+            &::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #0d6efd; // A standard blue
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+            &::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                background: #0d6efd;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+        }
+    }
+}

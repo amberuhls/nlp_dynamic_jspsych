@@ -1,0 +1,77 @@
+.screener-container {
+    max-width: 800px;
+    margin: auto;
+    text-align: center; // Center all text content within the container
+}
+
+.screener-header {
+    margin-bottom: 2rem;
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    p {
+        font-size: 1.1rem;
+        color: #333;
+    }
+}
+
+.screener-question {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    // Question titles and instructions
+    &__title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    &__instructions {
+        font-style: italic;
+        margin-bottom: 1rem;
+        color: #555;
+    }
+
+    // Container for radio/checkbox options
+    &__options {
+        display: inline-block; // Allows the block to be centered
+        text-align: left; // But the text inside it is left-aligned for readability
+    }
+
+    // Individual option (input + label)
+    &__option {
+        display: block;
+        margin-bottom: 0.5rem;
+
+        label {
+            margin-left: 0.5rem;
+        }
+    }
+}
+
+// Updated styling for the Prolific ID text input
+#prolific-id-input {
+    // This makes the input a block element, also forcing it onto its own line
+    display: block;
+
+    // You can adjust this value to make the input box as narrow as you like
+    max-width: 350px;
+
+    // This ensures it remains responsive within its container up to the max-width
+    width: 100%;
+
+    // These will center the narrower input box within the centered container
+    margin-left: auto;
+    margin-right: auto;
+
+    // Other styling to make it look nice
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
