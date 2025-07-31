@@ -46,7 +46,6 @@ const jsPsych = initJsPsych({
     }
 });
 
-// [Add this near the top of your src/js/main.js file]
 
 
 // Create a randomized list of 10 videos for the experiment
@@ -64,9 +63,8 @@ timeline.push({
     type: PreloadPlugin,
     video: [...video_list, ...Object.values(instruct)],
     audio: Object.values(audio),
+    message: "Please wait while we load the study.",
 });
-
-// --- Replace the existing "screener" trial with this new version ---
 
 const screener = {
     type: SurveyHtmlFormPlugin,
@@ -176,8 +174,6 @@ const screener_check_procedure = {
     }
 };
 
-// In your main timeline, you would now use these two trials in order:
-// timeline.push(screener, screener_check_procedure, instructions, ...);
 timeline.push(screener, screener_check_procedure);
 
 // ## 2. Instructions ##
@@ -286,10 +282,6 @@ const instructions = {
 
 timeline.push(instructions);
 
-
-
-// --- Replace the entire audio_check_procedure with this corrected version ---
-
 const audio_check_trial = {
     type: SurveyHtmlFormPlugin,
     html: `
@@ -310,7 +302,6 @@ const audio_check_trial = {
         </div>
     `,
     button_label: 'Continue',
-    // Add a data property to easily identify this trial's data
     data: {
         task: 'audio_check'
     }
@@ -353,8 +344,6 @@ const audio_check_procedure = {
         }
     }
 };
-// In your main timeline array, replace the old audio_check_loop with this new procedure:
-// timeline.push(screener, if_fluent_english, instructions, audio_check_procedure, video_procedure, ...);
 
 timeline.push(audio_check_procedure);
 
@@ -367,7 +356,7 @@ const video_trial = {
 
 
 
-// --- Replace the existing final_impression_trial ---
+
 const final_impression_trial = {
     type: HtmlKeyboardResponsePlugin,
     stimulus: `
@@ -442,10 +431,6 @@ const final_impression_trial = {
     },
 };
 
-// --- Replace the existing rating_trial ---
-// --- Replace the existing rating_trial object in main.js with this simplified version ---
-
-// --- Replace the existing rating_trial object in main.js with this version ---
 
 const rating_trial = {
     type: SurveyHtmlFormPlugin,
@@ -518,7 +503,7 @@ const rating_trial = {
     button_label: 'Submit Ratings'
 };
 
-// --- Replace the existing decision_trial ---
+
 const decision_trial = {
     type: HtmlButtonResponsePlugin, // This will now work because of the new import
     // ... stimulus and choices properties remain the same ...
@@ -578,8 +563,6 @@ const feedback_trial = {
 };
 // timeline.push(feedback);
 
-// Add this trial definition to your main.js file
-
 const demographics_trial = {
     type: SurveyHtmlFormPlugin,
     html: `
@@ -636,7 +619,7 @@ const demographics_trial = {
     `,
     button_label: 'Submit',
 };
-// Add this trial definition to your main.js file
+
 
 const finished_trial = {
     type: HtmlButtonResponsePlugin,
@@ -652,7 +635,7 @@ const finished_trial = {
     `,
     choices: ['Click here to return to Prolific and complete the study'],
 };
-// In your main.js, find the timeline definition and add the new trials
+
 
 // Push the final sections
 timeline.push(demographics_trial, feedback_trial, finished_trial);
