@@ -1,4 +1,6 @@
-// src/index.js
+// index.js
+console.log("Vite is running!");
+
 import { initJsPsych } from 'jspsych';
 import HtmlKeyboardResponsePlugin from '@jspsych/plugin-html-keyboard-response';
 import InstructionsPlugin from '@jspsych/plugin-instructions';
@@ -7,19 +9,11 @@ import SurveyTextPlugin from '@jspsych/plugin-survey-text';
 import HtmlButtonResponsePlugin from '@jspsych/plugin-html-button-response';
 import PreloadPlugin from '@jspsych/plugin-preload';
 import VideoDescriptionPlugin from './jspsych-video-description-trial.js';
-import SurveyPlugin from '@jspsych/plugin-survey';
 import "./styles/main.scss";
-const videoContext = require.context('./assets/video', false, /\.(mp4|webm|ogg|mov|MP4)$/);
-const instructContext = require.context('./assets/video/instruct', false, /\.(mp4|webm|ogg|mov|MP4)$/);
-const audioContext = require.context('./assets/video', false, /\.(m4a)$/)
 
-function importAll(r) {
-    let images = {};
-    r.keys().map((item) => {
-        images[item.replace('./', '')] = r(item);
-    });
-    return images;
-}
+const SHARED_ASSETS_BASE_URL = import.meta.env.DEV
+    ? '/' // Path for development server (e.g., localhost:5173/shared-assets/)
+    : '/webmt/nlp_dynamic/shared/';       // Path for production server (e.g., yourdomain.com/shared/)
 
 function saveData(id, data) {
     var xhr = new XMLHttpRequest();
@@ -29,9 +23,43 @@ function saveData(id, data) {
     console.log("Data saved to data/" + id);
 }
 
-const videos_all = Object.values(importAll(videoContext));
-const instruct = importAll(instructContext)
-const audio = importAll(audioContext);
+// This array contains only the filenames, as extracted from your screenshot.
+const videoFilenames = [
+    "P3.MBA.MP4",
+    "P4.MBA.MP4",
+    "P5.MBA.MP4",
+    "P6.MBA.MP4",
+    "P7.MBA.MP4",
+    "P8.MBA.MP4",
+    "P9.MBA.MP4",
+    "P10.MBA.MP4",
+    "P11.mov",
+    "P12.mov",
+    "P13.mov",
+    "P14.mov",
+    "P15.mov",
+    "P16.mov",
+    "P17.MBA.MP4",
+    "P18.MBA.MP4",
+    "P19.mov",
+    "P20.MBA.MP4",
+];
+
+// Construct the full URLs for all videos by mapping the filenames
+// and prepending the SHARED_ASSETS_BASE_URL and the 'assets/video/' subdirectory.
+const videos_all = videoFilenames.map(filename => `${SHARED_ASSETS_BASE_URL}assets/video/${filename}`);
+const instruct = {
+    "submitting.mov": `${SHARED_ASSETS_BASE_URL}assets/video/instruct/submitting.mov`,
+    "final.mov": `${SHARED_ASSETS_BASE_URL}assets/video/instruct/final.mov`,
+    "rating.mov": `${SHARED_ASSETS_BASE_URL}assets/video/instruct/rating.mov`,
+    "decision.mov": `${SHARED_ASSETS_BASE_URL}assets/video/instruct/decision.mov`,
+    // ... add any other instruction video filenames here
+};
+
+// The audio asset is treated as a shared asset, so its URL is constructed directly.
+const audio = {
+    "audiocheck.m4a": `${SHARED_ASSETS_BASE_URL}assets/video/audiocheck.m4a`
+};
 
 let test_mode = false;
 

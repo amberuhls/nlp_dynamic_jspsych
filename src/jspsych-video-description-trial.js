@@ -1,4 +1,4 @@
-import { JsPsych, JsPsychPlugin, ParameterType, TrialType } from "jspsych";
+import { ParameterType } from "jspsych";
 
 const info = {
     name: "video-description-trial",
