@@ -23,6 +23,8 @@ function saveData(id, data) {
     console.log("Data saved to data/" + id);
 }
 
+let jsPsych = initJsPsych();
+
 // This array contains only the filenames, as extracted from your screenshot.
 const videoFilenames = [
     "P3.MBA.MP4",
@@ -64,16 +66,6 @@ const audio = {
 let test_mode = false;
 
 let subj_id;
-const session_id = Date.now().toString(36) + Math.random().toString(36).substring(2);
-
-// Initialize jsPsych
-const jsPsych = initJsPsych({
-    on_finish: function () {
-        saveData(subj_id + "-" + session_id, jsPsych.data.get().csv());
-        window.location.href = "https://app.prolific.com/submissions/complete?cc=C1HROM6I";
-    }
-});
-
 
 
 // Create a randomized list of 10 videos for the experiment
@@ -84,15 +76,8 @@ const video_timeline_variables = video_list.map(video_name => ({ video: video_na
 
 
 
-// Main timeline
-const timeline = [];
 
-timeline.push({
-    type: PreloadPlugin,
-    video: [...video_list, ...Object.values(instruct)],
-    audio: Object.values(audio),
-    message: "Please wait while we load the study.",
-});
+
 
 const screener = {
     type: SurveyHtmlFormPlugin,
@@ -189,6 +174,8 @@ const screener_check_procedure = {
         // Get the data from the most recent trial (the screener)
         const data = jsPsych.data.get().last(1).values()[0];
 
+        console.log(data);
+
         // Check if either condition for rejection is met
         if (data.response.Eng === "No" || data.response.attention_check !== "Other") {
             // If they failed, we want to run the timeline above (screener_failed_trial)
@@ -202,7 +189,6 @@ const screener_check_procedure = {
     }
 };
 
-timeline.push(screener, screener_check_procedure);
 
 // ## 2. Instructions ##
 
@@ -308,8 +294,6 @@ const instructions = {
     button_label_previous: "Previous"
 };
 
-timeline.push(instructions);
-
 const audio_check_trial = {
     type: SurveyHtmlFormPlugin,
     html: `
@@ -373,7 +357,7 @@ const audio_check_procedure = {
     }
 };
 
-timeline.push(audio_check_procedure);
+
 
 // ## 4. Main Video Loop  ##
 const video_trial = {
@@ -562,8 +546,6 @@ const video_procedure = {
     }
 };
 
-// Push the full loop onto the main timeline
-timeline.push(video_procedure);
 
 
 
@@ -589,7 +571,7 @@ const feedback_trial = {
         }
     }
 };
-// timeline.push(feedback);
+
 
 const demographics_trial = {
     type: SurveyHtmlFormPlugin,
@@ -663,10 +645,100 @@ const finished_trial = {
     `,
     choices: ['Click here to return to Prolific and complete the study'],
 };
+// ========================================================================
+// --- PROGRESS SAVING AND RESUME LOGIC ---
+// ========================================================================
+
+// 1. ESTABLISH A PERSISTENT SESSION ID
+let session_id = sessionStorage.getItem('sessionId');
+if (!session_id) {
+    session_id = `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`;
+    sessionStorage.setItem('sessionId', session_id);
+}
+
+// 2. ATTEMPT TO LOAD PROGRESS
+const saved_progress_json = localStorage.getItem(`progress_${session_id}`);
+const saved_progress = saved_progress_json ? JSON.parse(saved_progress_json) : null;
+
+let session_video_list;
+
+// 3. INITIALIZE JSPYSCH WITH THE CORRECT CALLBACKS
+jsPsych = initJsPsych({
+    on_trial_start: () => {
+        // This is the "fast-forward" logic. It runs before every trial.
+        if (saved_progress) {
+            const current_index = jsPsych.getProgress().current_trial_global;
+            if (current_index < saved_progress.trial_index) {
+                jsPsych.finishTrial(); // Correct v8 function to skip a trial
+                console.log("Hello world 2")
+                console.log(jsPsych.getTimeline())
+            }
+        }
+    },
+    on_trial_finish: () => {
+        const current_progress = {
+            trial_index: jsPsych.getProgress().current_trial_global + 1, // Save the index of the NEXT trial
+            data: jsPsych.data.get().json(),
+            video_list: session_video_list // Also save the randomized video order
+        };
+        localStorage.setItem(`progress_${session_id}`, JSON.stringify(current_progress));
+    },
+    on_finish: function () {
+        saveData(`${subj_id}-${session_id}`, jsPsych.data.get().csv());
+        localStorage.removeItem(`progress_${session_id}`);
+        sessionStorage.removeItem('sessionId');
+        window.location.href = "https://app.prolific.com/submissions/complete?cc=C1HROM6I";
+    },
+    // Conditionally load data if progress exists
+    ...(saved_progress && { data: JSON.parse(saved_progress.data) })
+});
+
+// 4. PREPARE THE TIMELINE
+if (saved_progress) {
+    console.log("Saved progress found. Using saved video list.");
+    // If resuming, we MUST use the exact same video list as before.
+    session_video_list = saved_progress.video_list;
+} else {
+    // If this is a fresh session, create a new randomized video list.
+    console.log("No saved progress. Creating new video list.");
+    session_video_list = jsPsych.randomization.sampleWithReplacement(videos_all, 10);
+}
+// Apply the correct (saved or new) video list to the procedure.
+video_procedure.timeline_variables = session_video_list.map(video_name => ({ video: video_name }));
 
 
-// Push the final sections
-timeline.push(demographics_trial, feedback_trial, finished_trial);
+// 5. DEFINE THE FULL TIMELINE STRUCTURE
+const timeline = [
+    {
+        type: PreloadPlugin,
+        video: [...videos_all, ...Object.values(instruct)],
+        audio: Object.values(audio),
+        message: "Please wait while we load the study.",
+    },
+    screener,
+    screener_check_procedure,
+    instructions,
+    audio_check_procedure,
+    video_procedure,
+    demographics_trial,
+    feedback_trial,
+    finished_trial
+];
 
-// ## Run Experiment ##
+// Add the "Welcome Back" message if we are resuming
+if (saved_progress) {
+    timeline.unshift({
+        type: HtmlKeyboardResponsePlugin,
+        stimulus: `
+            <div class="page-container">
+                <h2>Welcome back!</h2>
+                <p class="page-text">Your progress has been restored. The experiment will now resume where you left off.</p>
+                <p class="page-text">Press any key to continue.</p>
+            </div>
+        `
+    });
+}
+
+// 6. RUN THE EXPERIMENT
+// We always run the full timeline. The on_trial_start logic handles skipping.
 jsPsych.run(timeline);
